@@ -21,7 +21,7 @@ namespace unity
                 ~Pipe ();
 
                 /* Read end descriptor is read-only */
-                int ReadEnd ();
+                int ReadEnd () const;
 
                 /* Write end descriptor is writable, we need to close it
                  * from other objects */

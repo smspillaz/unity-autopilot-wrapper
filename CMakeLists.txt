@@ -173,6 +173,7 @@ set (UAW_MATCHERS_LIBRARY uaw_matchers)
 set (UAW_TESTS_UTIL_LIBRARY uaw_tests_util)
 
 set (UAW_MAIN_LIBRARY unity_autopilot_wrapper_main)
+set (UAW_LIBRARY uaw_static)
 set (UAW_BINARY unity_autopilot_wrapper)
 
 add_subdirectory (${UAW_INTERNAL_SOURCE_DIRECTORY})

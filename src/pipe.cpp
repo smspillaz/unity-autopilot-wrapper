@@ -36,7 +36,7 @@ uaw::Pipe::~Pipe ()
         std::cerr << "mPipe[0] " << strerror (errno) << std::endl;
 }
 
-int uaw::Pipe::ReadEnd ()
+int uaw::Pipe::ReadEnd () const
 {
     return mPipe[0];
 }
