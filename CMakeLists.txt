@@ -8,6 +8,8 @@ project (UnityAutopilotWrapper)
 
 cmake_minimum_required (VERSION 2.8 FATAL_ERROR)
 
+include (FindPkgConfig)
+
 function (check_python_module MODULE)
     message (STATUS "Checking for python module " ${MODULE})
     execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "import ${MODULE}"
@@ -16,8 +18,8 @@ function (check_python_module MODULE)
                      ERROR_QUIET)
 
     if (${_import_result} EQUAL 1)
-        message (SEND_ERROR "${MODULE} is required to build "
-                            "unity-autopilot-wrapper")
+        message (WARNING "${MODULE} is required to run "
+                          "unity-autopilot-wrapper")
     endif (${_import_result} EQUAL 1)
 endfunction ()
 
@@ -49,6 +51,32 @@ find_package (VeraPP 1.2 REQUIRED)
 
 # Check for autopilot
 find_autopilot ()
+
+# Check compiz, unity
+pkg_check_modules (COMPIZ compiz)
+pkg_check_modules (UNITY unity)
+
+# Check for xephyr
+find_program (XEPHYR Xephyr)
+mark_as_advanced (XEPHYR)
+
+if (${XEPHYR} STREQUAL "XEPHYR-NOTFOUND")
+    message (WARNING "Xephyr not found, you will not be able to run "
+                     "unity-autopilot-wrapper in xephyr")
+endif (${XEPHYR} STREQUAL "XEPHYR-NOTFOUND")
+
+# Check for unity-autopilot-wrapper pkgconfig dependencies
+pkg_check_modules (UAW_EXTERNAL_DEPS REQUIRED xorg-gtest)
+
+if (NOT COMPIZ_FOUND)
+    message (WARNING "Compiz not found, you will not be able to run "
+                     "unity-autopilot-wrapper")
+endif (NOT COMPIZ_FOUND)
+
+if (NOT UNITY_FOUND)
+    message (WARNING "Unity not found, you will not be able to run "
+                     "unity-autopilot-wrapper")
+endif (NOT UNITY_FOUND)
 
 if (NOT GTEST_FOUND)
 

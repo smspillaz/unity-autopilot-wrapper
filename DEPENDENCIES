@@ -1,7 +1,7 @@
-python-autopilot
 libboost-dev
 libboost-program-options-dev
 libgtest-dev
+libxorg-gtest-dev
 google-mock
 vera++
-unity-autopilot
+python
