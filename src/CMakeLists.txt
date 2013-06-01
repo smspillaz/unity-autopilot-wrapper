@@ -11,6 +11,16 @@ include_directories (${UAW_EXTERNAL_INCLUDE_DIRS}
 # as the lines need to go over 100 chars
 
 set (UAW_SRCS
+     ${CMAKE_CURRENT_SOURCE_DIR}/fdbackup.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/fdbackup.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/launch.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/launch.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/pipe.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/readfd.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/readfd.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/redirectedfd.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/redirectedfd.h
      ${CMAKE_CURRENT_SOURCE_DIR}/unity_autopilot_wrapper.cpp)
 
 add_executable (${UAW_BINARY}
