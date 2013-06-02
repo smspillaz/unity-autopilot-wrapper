@@ -1,35 +1,22 @@
-# /tests/unit/CMakeLists.txt
+# /tests/acceptance/CMakeLists.txt
 #
-# Build unity-autopilot-wrapper unit tests
+# Build unity-autopilot-wrapper acceptance tests
 #
 # See LICENSE.md for Copyright information.
 
 include_directories (${UAW_INTERNAL_INCLUDE_DIRECTORY}
                      ${UAW_INTERNAL_SOURCE_DIRECTORY}
-                     ${CMAKE_CURRENT_BINARY_DIR}
+                     ${UAW_CONFIG_BINARY_DIR}
                      ${UAW_MOCKS_DIRECTORY}
                      ${UAW_MATCHERS_DIRECTORY}
                      ${UAW_TESTS_UTIL_DIRECTORY}
                      ${UAW_EXTERNAL_INCLUDE_DIRS})
 
-set (UAW_SIMPLE_EXECUTABLE_DIRECTORY
-     ${CMAKE_CURRENT_BINARY_DIR})
-
-set (UAW_SIMPLE_EXECUTABLE_BINARY
-     simple_executable)
-
-set (UAW_SIMPLE_EXECUTABLE_SRCS
-     ${CMAKE_CURRENT_SOURCE_DIR}/simple_executable.cpp)
-
-add_executable (${UAW_SIMPLE_EXECUTABLE_BINARY}
-                ${UAW_SIMPLE_EXECUTABLE_SRCS})
-
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/uaw_acceptance_tests_config.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/uaw_acceptance_tests_config.h)
-
 set (UAW_ACCEPTANCE_TESTS_SRCS
      ${CMAKE_CURRENT_SOURCE_DIR}/launch.cpp
-     ${CMAKE_CURRENT_BINARY_DIR}/uaw_acceptance_tests_config.h)
+     ${CMAKE_CURRENT_SOURCE_DIR}/environment.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/discovery.cpp
+     ${UAW_CONFIG_BINARY_DIR}/uaw_acceptance_tests_config.h)
 
 set (UAW_ACCEPTANCE_TESTS_BINARY
      uaw_acceptance_tests)
@@ -45,6 +32,9 @@ verapp_profile_check_source_files_conformance (${UAW_VERAPP_OUTPUT_DIRECTORY}
 
 target_link_libraries (${UAW_ACCEPTANCE_TESTS_BINARY}
                        ${UAW_LIBRARY}
+                       ${UAW_MOCKS_LIBRARY}
+                       ${UAW_MATCHERS_LIBRARY}
+                       ${UAW_TESTS_UTIL_LIBRARY}
                        ${GTEST_LIBRARY}
                        ${GMOCK_LIBRARY}
                        ${GMOCK_MAIN_LIBRARY})

@@ -20,6 +20,7 @@ namespace unity
                             const char        **argv,
                             int               &stderrWriteEnd,
                             int               &stdoutWriteEnd);
+        int    waitForProcessEnd (pid_t process);
         int launchBinaryAndWaitForReturn (const std::string &executable,
                                           const char        **argv,
                                           int               &stderrWriteEnd,

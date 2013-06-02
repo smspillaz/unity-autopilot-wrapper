@@ -86,16 +86,9 @@ pid_t uaw::launchBinary (const std::string &executable,
     return child;
 }
 
-int uaw::launchBinaryAndWaitForReturn (const std::string &executable,
-                                       const char        **argv,
-                                       int               &stderrWriteEnd,
-                                       int               &stdoutWriteEnd)
+int uaw::waitForProcessEnd (pid_t child)
 {
     int status = 0;
-    pid_t child = launchBinary (executable,
-                                argv,
-                                stderrWriteEnd,
-                                stdoutWriteEnd);
 
     do
     {
@@ -123,4 +116,17 @@ int uaw::launchBinaryAndWaitForReturn (const std::string &executable,
 
     /* Return the exit code */
     return WEXITSTATUS (status);
+}
+
+int uaw::launchBinaryAndWaitForReturn (const std::string &executable,
+                                       const char        **argv,
+                                       int               &stderrWriteEnd,
+                                       int               &stdoutWriteEnd)
+{
+    pid_t child = launchBinary (executable,
+                                argv,
+                                stderrWriteEnd,
+                                stdoutWriteEnd);
+
+    return waitForProcessEnd (child);
 }

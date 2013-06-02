@@ -33,7 +33,7 @@ class Launch :
 };
 
 Launch::Launch () :
-    executable (std::string (uawt::SimpleExecutableDirectory) +
+    executable (std::string (uawt::SimpleExecutableDirectory) + "/" +
                 std::string (uawt::SimpleExecutable))
 {
 }

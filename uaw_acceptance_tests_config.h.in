@@ -15,7 +15,7 @@ namespace unity
         namespace test
         {
             char const SimpleExecutableDirectory[] =
-                "@UAW_SIMPLE_EXECUTABLE_DIRECTORY@/";
+                "@UAW_SIMPLE_EXECUTABLE_DIRECTORY@";
             char const SimpleExecutable[] =
                 "@UAW_SIMPLE_EXECUTABLE_BINARY@";
         }

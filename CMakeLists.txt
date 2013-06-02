@@ -41,12 +41,13 @@ endfunction (find_autopilot)
 set (UAW_CMAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set (UAW_VERAPP_CMAKE_DIRECTORY ${UAW_CMAKE_DIRECTORY}/Vera++)
 set (CMAKE_MODULE_PATH
-     ${UAW_VERAPP_CMAKE_DIRECTORY} ${CMAKE_MODULE_PATH})
+     ${UAW_VERAPP_CMAKE_DIRECTORY} ${UAW_CMAKE_DIRECTORY} ${CMAKE_MODULE_PATH})
 
 set (Boost_USE_STATIC_LIBS ON)
 
 find_package (Boost 1.46 COMPONENTS program_options)
-find_package (GTest QUIET)
+find_package (GoogleTest REQUIRED)
+find_package (XorgGTest REQUIRED)
 find_package (VeraPP 1.2 REQUIRED)
 
 # Check for autopilot
@@ -78,52 +79,6 @@ if (NOT UNITY_FOUND)
                      "unity-autopilot-wrapper")
 endif (NOT UNITY_FOUND)
 
-if (NOT GTEST_FOUND)
-
-    # Find the the Google Test include directory
-    # by searching the system-wide include directory
-    # paths
-    find_path (GTEST_INCLUDE_DIR
-               gtest/gtest.h)
-
-    if (GTEST_INCLUDE_DIR)
-        set (GTEST_INCLUDE_BASE "include/")
-        string (LENGTH ${GTEST_INCLUDE_BASE} GTEST_INCLUDE_BASE_LENGTH)
-        string (LENGTH ${GTEST_INCLUDE_DIR} GTEST_INCLUDE_DIR_LENGTH)
-
-        math (EXPR
-              GTEST_INCLUDE_PREFIX_LENGTH
-              "${GTEST_INCLUDE_DIR_LENGTH} - ${GTEST_INCLUDE_BASE_LENGTH}")
-        string (SUBSTRING
-                ${GTEST_INCLUDE_DIR}
-                0
-                ${GTEST_INCLUDE_PREFIX_LENGTH}
-                GTEST_INCLUDE_PREFIX)
-
-        set (GTEST_SRC_DIR ${GTEST_INCLUDE_PREFIX}/src/gtest)
-
-        add_subdirectory (${GTEST_SRC_DIR}
-                          ${CMAKE_CURRENT_BINARY_DIR}/src/gtest)
-
-        set (GTEST_LIBRARY gtest)
-        set (GTEST_MAIN_LIBRARY gtest_main)
-        set (GTEST_BOTH_LIBRARIES
-             ${GTEST_LIBRARY}
-             ${GTEST_MAIN_LIBRARY})
-
-        set (GTEST_FOUND TRUE)
-    endif (GTEST_INCLUDE_DIR)
-
-endif (NOT GTEST_FOUND)
-
-find_library (GMOCK_LIBRARY gmock)
-find_library (GMOCK_MAIN_LIBRARY gmock_main)
-
-if (NOT GTEST_FOUND OR NOT GMOCK_LIBRARY OR NOT GMOCK_MAIN_LIBRARY)
-    message (SEND_ERROR "Google Test is required to build "
-                        "unity-autopilot-wrapper")
-endif (NOT GTEST_FOUND OR NOT GMOCK_LIBRARY OR NOT GMOCK_MAIN_LIBRARY)
-
 # Set up Vera++
 set (UAW_VERAPP_OUTPUT_DIRECTORY
      ${CMAKE_CURRENT_BINARY_DIR}/vera++)
@@ -148,6 +103,9 @@ set (UAW_VERAPP_IMPORT_RULES uaw_verapp_import_rules)
 
 include (${UAW_CMAKE_DIRECTORY}/VeraPPTargets.cmake)
 
+# Build xorg-gtest
+include (${UAW_CMAKE_DIRECTORY}/XorgGTestTargets.cmake)
+
 # -fPIC, -Wall and -Werror are mandatory
 set (COMPILER_FLAGS "-fPIC -Wall -Werror")
 set (CXX_CXX11_FLAGS "-std=c++0x")
@@ -160,6 +118,9 @@ set (UAW_EXTERNAL_LIBRARY_DIRS
      ${Boost_LIBRARY_DIRS})
 set (UAW_EXTERNAL_LIBRARIES
      ${Boost_LIBRARIES}
+     ${XORG_SERVER_GTEST_LIBRARIES}
+     ${XORG_SERVER_LIBRARIES}
+     xorg_gtest_all
      ${GTEST_MAIN_LIBRARY})
 set (UAW_INTERNAL_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set (UAW_INTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -167,6 +128,7 @@ set (UAW_TESTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 set (UAW_MOCKS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mocks)
 set (UAW_MATCHERS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/matchers)
 set (UAW_TESTS_UTIL_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testsutil)
+set (UAW_TESTS_UTIL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testsutil)
 
 set (UAW_MOCKS_LIBRARY uaw_mocks)
 set (UAW_MATCHERS_LIBRARY uaw_matchers)
@@ -175,6 +137,35 @@ set (UAW_TESTS_UTIL_LIBRARY uaw_tests_util)
 set (UAW_MAIN_LIBRARY unity_autopilot_wrapper_main)
 set (UAW_LIBRARY uaw_static)
 set (UAW_BINARY unity_autopilot_wrapper)
+set (UAW_XEPHYR_WRAPPER_BINARY UnityXephyrWrapper)
+
+# tests configuration
+set (UAW_CONFIG_BINARY_DIR
+     ${CMAKE_CURRENT_BINARY_DIR})
+
+set (UAW_SIMPLE_EXECUTABLE_DIRECTORY
+     ${UAW_TESTS_UTIL_BINARY_DIRECTORY})
+
+set (UAW_SIMPLE_EXECUTABLE_BINARY
+     simple_executable)
+
+set (UAW_FAKE_AUTOPILOT_BINARY
+     autopilot)
+
+set (UAW_FAKE_COMPIZ_BINARY
+     compiz)
+
+set (UAW_FAKE_XORG_BINARY
+     Xorg)
+
+set (UAW_FAKE_XEPHYR_BINARY
+     UnityXephyrWrapper)
+
+set (UAW_FAKE_DBUS_LAUNCH_BINARY
+     dbus-launch)
+
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/uaw_acceptance_tests_config.h.in
+                ${UAW_CONFIG_BINARY_DIR}/uaw_acceptance_tests_config.h)
 
 add_subdirectory (${UAW_INTERNAL_SOURCE_DIRECTORY})
 add_subdirectory (${UAW_TESTS_DIRECTORY})

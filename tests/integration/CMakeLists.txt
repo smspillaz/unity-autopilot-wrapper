@@ -6,6 +6,7 @@
 
 include_directories (${UAW_INTERNAL_INCLUDE_DIRECTORY}
                      ${UAW_INTERNAL_SOURCE_DIRECTORY}
+                     ${UAW_CONFIG_BINARY_DIR}
                      ${UAW_MOCKS_DIRECTORY}
                      ${UAW_MATCHERS_DIRECTORY}
                      ${UAW_TESTS_UTIL_DIRECTORY}
@@ -16,6 +17,7 @@ set (UAW_INTEGRATION_TESTS_BINARY
 
 set (UAW_INTEGRATION_TESTS_SRCS
      ${CMAKE_CURRENT_SOURCE_DIR}/fdbackup.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/locatebinary.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/readfd.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/redirectedfd.cpp)
@@ -31,6 +33,9 @@ verapp_profile_check_source_files_conformance (${UAW_VERAPP_OUTPUT_DIRECTORY}
 
 target_link_libraries (${UAW_INTEGRATION_TESTS_BINARY}
                        ${UAW_LIBRARY}
+                       ${UAW_TESTS_UTIL_LIBRARY}
+                       ${UAW_MOCKS_LIBRARY}
+                       ${UAW_MATCHERS_LIBRARY}
                        ${GTEST_LIBRARY}
                        ${GMOCK_LIBRARY}
                        ${GMOCK_MAIN_LIBRARY})
