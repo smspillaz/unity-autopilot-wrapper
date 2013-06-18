@@ -14,6 +14,7 @@ include_directories (${UAW_INTERNAL_INCLUDE_DIRECTORY}
 
 set (UAW_UNIT_TESTS_SRCS
      ${CMAKE_CURRENT_SOURCE_DIR}/displaydiscovery.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resizescreen.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/serversetup.cpp
      ${UAW_CONFIG_BINARY_DIR}/uaw_acceptance_tests_config.h)
 
