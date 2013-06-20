@@ -15,14 +15,30 @@ namespace unity
     namespace autopilot_wrapper
     {
         class ConcreteX11Connection :
-            public unity::autopilot_wrapper::X11Connection
+            public X11Connection
         {
             public:
 
+                class ConfigDeleter :
+                    public XRRScreenConfigDeleter
+                {
+                    public:
+
+                        typedef XRRScreenConfiguration SConf;
+
+                        virtual ~ConfigDeleter ();
+                        virtual void operator() (SConf *) const;
+                };
+
                 Display * OpenDisplay (char *arg) const;
                 int CloseDisplay (Display *disp) const;
-                ScreenSizeArray GetScreenSizes (Display *) const;
-                void ChangeSizeIndex (Display *, unsigned int index) const;
+                XRRScreenConfiguration *
+                GetConfig (Display *display) const;
+                ScreenSizeArray
+                GetScreenSizes (ScreenConfig const &) const;
+                void ChangeSizeIndex (Display *,
+                                      ScreenConfig const &,
+                                      unsigned int index) const;
         };
     }
 }

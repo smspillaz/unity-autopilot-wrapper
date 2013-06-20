@@ -14,7 +14,9 @@
 
 using ::testing::_;
 using ::testing::AtLeast;
+using ::testing::IsNull;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::Test;
 
 namespace uaw = unity::autopilot_wrapper;
@@ -39,12 +41,13 @@ class ResizeScreen :
 void
 ResizeScreen::IgnoreChangeSizeIndex ()
 {
-    EXPECT_CALL (connection, ChangeSizeIndex (_, _)).Times (AtLeast (0));
+    EXPECT_CALL (connection, ChangeSizeIndex (_, _, _)).Times (AtLeast (0));
 }
 
 void
 ResizeScreen::IgnoreGetScreenSizes ()
 {
+    EXPECT_CALL (connection, GetConfig (_)).Times (AtLeast (0));
     EXPECT_CALL (connection, GetScreenSizes (_)).Times (AtLeast (0));
 }
 
@@ -52,7 +55,9 @@ TEST_F (ResizeScreen, AlwaysCheckAvailableScreenSizes)
 {
     IgnoreChangeSizeIndex ();
 
-    EXPECT_CALL (connection, GetScreenSizes (&display))
+    EXPECT_CALL (connection, GetConfig (&display))
+        .WillOnce (ReturnNull ());
+    EXPECT_CALL (connection, GetScreenSizes (IsNull ()))
         .WillOnce (Return (uaw::ScreenSizeArray ()));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
@@ -65,7 +70,7 @@ TEST_F (ResizeScreen, NoScreenSizesNoCallToScale)
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (uaw::ScreenSizeArray ()));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (_, _))
+    EXPECT_CALL (connection, ChangeSizeIndex (_, _, _))
         .Times (0);
 
     uaw::ScaleToPreferredMinimum (&display, connection);
@@ -75,15 +80,25 @@ TEST_F (ResizeScreen, OneScreenSizeNoCallToScale)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[1] =
+    {
+        {
+            0,
+            0,
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[1]);
+    array.array = sizes;
     array.num = 1;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (_, _))
+    EXPECT_CALL (connection, ChangeSizeIndex (_, _, _))
         .Times (0);
 
     uaw::ScaleToPreferredMinimum (&display, connection);
@@ -93,20 +108,31 @@ TEST_F (ResizeScreen, PickExact)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[2] =
+    {
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 2),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth),
+            static_cast <int> (uaw::PreferredMinimumHeight),
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[2]);
+    array.array = sizes;
     array.num = 2;
-
-    array.array[0].width = uaw::PreferredMinimumWidth / 2;
-    array.array[0].height = uaw::PreferredMinimumHeight / 2;
-    array.array[1].width = uaw::PreferredMinimumWidth;
-    array.array[1].height = uaw::PreferredMinimumHeight;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (&display, 1));
+    EXPECT_CALL (connection, ChangeSizeIndex (&display, _, 1));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
 }
@@ -115,22 +141,37 @@ TEST_F (ResizeScreen, PickBestLower)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[3] =
+    {
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 2),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.5),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.5),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.2),
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[3]);
+    array.array = sizes;
     array.num = 3;
-
-    array.array[0].width = uaw::PreferredMinimumWidth / 2;
-    array.array[0].height = uaw::PreferredMinimumHeight / 2;
-    array.array[1].width = uaw::PreferredMinimumWidth / 1.5;
-    array.array[1].height = uaw::PreferredMinimumHeight / 1.5;
-    array.array[2].width = uaw::PreferredMinimumWidth / 1.2;
-    array.array[2].height = uaw::PreferredMinimumHeight / 1.2;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (&display, 2));
+    EXPECT_CALL (connection, ChangeSizeIndex (&display, _, 2));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
 }
@@ -140,22 +181,37 @@ TEST_F (ResizeScreen, PickBestUpper)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[3] =
+    {
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 2),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.5),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.5),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth * 1.2),
+            static_cast <int> (uaw::PreferredMinimumHeight * 1.2),
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[3]);
+    array.array = sizes;
     array.num = 3;
-
-    array.array[0].width = uaw::PreferredMinimumWidth / 2;
-    array.array[0].height = uaw::PreferredMinimumHeight / 2;
-    array.array[1].width = uaw::PreferredMinimumWidth / 1.5;
-    array.array[1].height = uaw::PreferredMinimumHeight / 1.5;
-    array.array[2].width = uaw::PreferredMinimumWidth * 1.2;
-    array.array[2].height = uaw::PreferredMinimumHeight * 1.2;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (&display, 2));
+    EXPECT_CALL (connection, ChangeSizeIndex (&display, _, 2));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
 }
@@ -164,22 +220,37 @@ TEST_F (ResizeScreen, PreferHigherAllElseEqual)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[3] =
+    {
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 2),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.5),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.5),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth * 1.5),
+            static_cast <int> (uaw::PreferredMinimumHeight * 1.5),
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[3]);
+    array.array = sizes;
     array.num = 3;
-
-    array.array[0].width = uaw::PreferredMinimumWidth / 2;
-    array.array[0].height = uaw::PreferredMinimumHeight / 2;
-    array.array[1].width = uaw::PreferredMinimumWidth / 1.5;
-    array.array[1].height = uaw::PreferredMinimumHeight / 1.5;
-    array.array[2].width = uaw::PreferredMinimumWidth * 1.5;
-    array.array[2].height = uaw::PreferredMinimumHeight * 1.5;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (&display, 2));
+    EXPECT_CALL (connection, ChangeSizeIndex (&display, _, 2));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
 }
@@ -188,20 +259,31 @@ TEST_F (ResizeScreen, PreferCloserWidthThanHeight)
 {
     IgnoreGetScreenSizes ();
 
+    XRRScreenSize sizes[2] =
+    {
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.2),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.5),
+            0,
+            0
+        },
+        {
+            static_cast <int> (uaw::PreferredMinimumWidth / 1.5),
+            static_cast <int> (uaw::PreferredMinimumHeight / 1.2),
+            0,
+            0
+        }
+    };
+
     uaw::ScreenSizeArray array;
 
-    array.array.reset (new XRRScreenSize[2]);
+    array.array = sizes;
     array.num = 2;
-
-    array.array[0].width = uaw::PreferredMinimumWidth / 1.2;
-    array.array[0].height = uaw::PreferredMinimumHeight / 1.5;
-    array.array[1].width = uaw::PreferredMinimumWidth / 1.5;
-    array.array[1].height = uaw::PreferredMinimumHeight / 1.2;
 
     ON_CALL (connection, GetScreenSizes (_))
         .WillByDefault (Return (array));
 
-    EXPECT_CALL (connection, ChangeSizeIndex (&display, 0));
+    EXPECT_CALL (connection, ChangeSizeIndex (&display, _, 0));
 
     uaw::ScaleToPreferredMinimum (&display, connection);
 }

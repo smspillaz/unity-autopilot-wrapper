@@ -9,7 +9,7 @@
 #ifndef UAW_X11_CONNECTION_H
 #define UAW_X11_CONNECTION_H
 
-#include <boost/shared_array.hpp>
+#include <memory>
 
 #include <X11/extensions/Xrandr.h>
 
@@ -21,11 +21,20 @@ namespace unity
     {
         struct ScreenSizeArray
         {
-            typedef boost::shared_array <XRRScreenSize> Array;
-
-            Array        array;
-            unsigned int num;
+            XRRScreenSize *array;
+            int           num;
         };
+
+        class XRRScreenConfigDeleter
+        {
+            public:
+
+                virtual ~XRRScreenConfigDeleter ();
+                virtual void operator() (XRRScreenConfiguration *) const;
+        };
+
+        typedef std::unique_ptr <XRRScreenConfiguration,
+                                 const XRRScreenConfigDeleter &> ScreenConfig;
 
         class X11Connection
         {
@@ -36,8 +45,18 @@ namespace unity
 
                 virtual Display * OpenDisplay (char *) const = 0;
                 virtual int CloseDisplay (Display *) const = 0;
-                virtual ScreenSizeArray GetScreenSizes (Display *) const = 0;
-                virtual void ChangeSizeIndex (Display *, unsigned int index) const = 0;
+
+                /* This is a little bit awkward as we're unable to return
+                 * unique_ptrs from Google Mock because they are not
+                 * copyable. Clients should store the return value
+                 * in a unique_ptr */
+                virtual XRRScreenConfiguration *
+                GetConfig (Display *display) const = 0;
+                virtual ScreenSizeArray
+                GetScreenSizes (ScreenConfig const &) const = 0;
+                virtual void ChangeSizeIndex (Display *,
+                                              ScreenConfig const &,
+                                              unsigned int index) const = 0;
 
             private:
 

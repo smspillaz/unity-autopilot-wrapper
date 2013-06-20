@@ -6,6 +6,9 @@
  * See LICENSE.md for Copyright information
  */
 #include <vector>
+#include <limits>
+
+#include <cmath>
 
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
@@ -18,13 +21,18 @@ namespace uaw = unity::autopilot_wrapper;
 bool uaw::ScaleToPreferredMinimum (Display             *display,
                                    X11Connection const &connection)
 {
+    auto              deleter = uaw::XRRScreenConfigDeleter ();
+    uaw::ScreenConfig config (connection.GetConfig (display),
+                              deleter);
     uaw::ScreenSizeArray sizes =
-        connection.GetScreenSizes (display);
+        connection.GetScreenSizes (config);
 
     int bestScoringPositive = -1;
     int bestScoringNegative = -1;
-    unsigned int bestScoringWidth = std::numeric_limits <unsigned int>::max ();
-    unsigned int bestScoringHeight = std::numeric_limits <unsigned int>::max ();
+    unsigned int bestScoringWidth =
+        std::numeric_limits <unsigned int>::max ();
+    unsigned int bestScoringHeight =
+        std::numeric_limits <unsigned int>::max ();
 
     if (sizes.num > 1)
     {
@@ -37,7 +45,7 @@ bool uaw::ScaleToPreferredMinimum (Display             *display,
             if (width == uaw::PreferredMinimumWidth &&
                 height == uaw::PreferredMinimumHeight)
             {
-                connection.ChangeSizeIndex (display, i);
+                connection.ChangeSizeIndex (display, config, i);
                 return true;
             }
 
@@ -47,9 +55,9 @@ bool uaw::ScaleToPreferredMinimum (Display             *display,
                 uaw::PreferredMinimumHeight - height;
 
             unsigned int absoluteWidthDifference =
-                abs (widthDifference);
+                std::abs (widthDifference);
             unsigned int absoluteHeightDifference =
-                abs (heightDifference);
+                std::abs (heightDifference);
 
             bool negative = false;
 
@@ -86,8 +94,8 @@ bool uaw::ScaleToPreferredMinimum (Display             *display,
 
         if (static_cast <int> (bestScoringNegative) != -1)
         {
-            widthNegative = abs (sizes.array[bestScoringNegative].width);
-            heightNegative = abs (sizes.array[bestScoringNegative].height);
+            widthNegative = std::abs (sizes.array[bestScoringNegative].width);
+            heightNegative = std::abs (sizes.array[bestScoringNegative].height);
         }
 
         if (static_cast <int> (bestScoringPositive) != -1)
@@ -110,7 +118,9 @@ bool uaw::ScaleToPreferredMinimum (Display             *display,
 
         if (index != -1)
         {
-            connection.ChangeSizeIndex (display, static_cast <unsigned int> (index));
+            connection.ChangeSizeIndex (display,
+                                        config,
+                                        static_cast <unsigned int> (index));
             return true;
         }
     }
