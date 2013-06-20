@@ -14,6 +14,7 @@
 #include <gmock/gmock.h>
 
 #include "environment.h"
+#include "resizescreen.h"
 #include "tmpenv.h"
 
 #include "x11_connection.h"
@@ -32,6 +33,7 @@ using ::testing::MatcherInterface;
 using ::testing::MakeMatcher;
 using ::testing::MatchResultListener;
 using ::testing::StrEq;
+using ::testing::ReturnNull;
 using ::unity::autopilot_wrapper::matchers::IsDisplayNumber;
 
 namespace uaw = unity::autopilot_wrapper;
@@ -118,6 +120,8 @@ class UAWEnvironment :
         uawt::TmpEnv compizPluginPath;
         uawt::TmpEnv unityLogSeverity;
 
+        XRRScreenSize availableSizes[2];
+
     protected:
 
         Display           fakeDisplayObject;
@@ -142,7 +146,35 @@ UAWEnvironment::UAWEnvironment () :
     uawEnvironment (connection),
     environment (&uawEnvironment)
 {
+    XRRScreenSize sizes[2] =
+    {
+        {
+            0, 0, 0, 0
+        },
+        {
+            uaw::PreferredMinimumWidth,
+            uaw::PreferredMinimumHeight,
+            0,
+            0
+        }
+    };
+
+    memcpy (availableSizes, sizes, sizeof (XRRScreenSize) * 2);
+
+    uaw::ScreenSizeArray array;
+    array.array = availableSizes;
+    array.num = 2;
+
     AvailableDisplayNumber (1);
+
+    /* Set up dummy expectations and behaviour for
+     * changing the resolution */
+    EXPECT_CALL (connection, GetConfig (_)).Times (AtLeast (0));
+    EXPECT_CALL (connection, GetScreenSizes (_)).Times (AtLeast (0));
+    EXPECT_CALL (connection, ChangeSizeIndex (_, _, _)).Times (AtLeast (0));
+
+    ON_CALL (connection, GetConfig (_)).WillByDefault (ReturnNull ());
+    ON_CALL (connection, GetScreenSizes (_)).WillByDefault (Return (array));
 }
 
 TEST_F (UAWEnvironment, ThrowOnNoDisplayFound)
@@ -165,6 +197,14 @@ TEST_F (UAWEnvironment, FindDisplayAndSetEnv)
     EnvironmentRAII env (environment);
 
     EXPECT_THAT (getenv ("DISPLAY"), StrEq (":1"));
+}
+
+TEST_F (UAWEnvironment, ChangeScreenSize)
+{
+    /* Change to preferred size */
+    EXPECT_CALL (connection, ChangeSizeIndex (_, _, 1));
+
+    EnvironmentRAII env (environment);
 }
 
 TEST_F (UAWEnvironment, DBusSessionBusAddressSetByDBusLaunch)

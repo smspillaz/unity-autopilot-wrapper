@@ -16,6 +16,7 @@ set (UAW_INTEGRATION_TESTS_BINARY
      uaw_integration_tests)
 
 set (UAW_INTEGRATION_TESTS_SRCS
+     ${CMAKE_CURRENT_SOURCE_DIR}/concrete_x11.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/fdbackup.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/locatebinary.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/pipe.cpp
@@ -38,4 +39,4 @@ target_link_libraries (${UAW_INTEGRATION_TESTS_BINARY}
                        ${UAW_MATCHERS_LIBRARY}
                        ${GTEST_LIBRARY}
                        ${GMOCK_LIBRARY}
-                       ${GMOCK_MAIN_LIBRARY})
+                       ${XORG_GTEST_MAIN_LIBRARY})

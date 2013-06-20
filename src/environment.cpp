@@ -26,6 +26,7 @@
 #include "exports.h"
 #include "launch.h"
 #include "readfd.h"
+#include "resizescreen.h"
 #include "locatebinary.h"
 #include "pipe.h"
 #include "serversetup.h"
@@ -185,6 +186,9 @@ void uaw::Environment::SetUp ()
         /* Will open the just-exported display string */
         dpy = priv->X11Conn.OpenDisplay (getenv ("DISPLAY"));
     }
+
+    /* Change resolution */
+    uaw::ScaleToPreferredMinimum (dpy, priv->X11Conn);
 
     /* Launch dbus-launch and grab the environment variables that it sets */
     priv->DbusLaunch =

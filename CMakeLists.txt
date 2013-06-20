@@ -67,7 +67,7 @@ if (${XEPHYR} STREQUAL "XEPHYR-NOTFOUND")
 endif (${XEPHYR} STREQUAL "XEPHYR-NOTFOUND")
 
 # Check for unity-autopilot-wrapper pkgconfig dependencies
-pkg_check_modules (UAW_EXTERNAL_DEPS REQUIRED xorg-gtest)
+pkg_check_modules (UAW_EXTERNAL_DEPS xorg-gtest x11 xrandr)
 
 if (NOT COMPIZ_FOUND)
     message (WARNING "Compiz not found, you will not be able to run "
@@ -113,10 +113,13 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS} ${CXX_CXX11_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILER_FLAGS}")
 
 set (UAW_EXTERNAL_INCLUDE_DIRS
+     ${UAW_EXTERNAL_DEPS_INCLUDE_DIRS}
      ${Boost_INCLUDE_DIRS})
 set (UAW_EXTERNAL_LIBRARY_DIRS
+     ${UAW_EXTERNAL_DEPS_LIBRARY_DIRS}
      ${Boost_LIBRARY_DIRS})
 set (UAW_EXTERNAL_LIBRARIES
+     ${UAW_EXTERNAL_DEPS_LIBRARIES}
      ${Boost_LIBRARIES}
      ${XORG_SERVER_GTEST_LIBRARIES}
      ${XORG_SERVER_LIBRARIES}
