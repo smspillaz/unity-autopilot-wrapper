@@ -22,11 +22,20 @@ namespace unity
             {
                 public:
 
+                    typedef ScreenSizeArray        Sizes;
+                    typedef XRRScreenConfiguration SConf;
+                    typedef ScreenConfig           SCPtr;
+
                     MockX11Connection ();
                     ~MockX11Connection ();
 
                     MOCK_CONST_METHOD1 (OpenDisplay, Display * (char *));
                     MOCK_CONST_METHOD1 (CloseDisplay, int (Display *));
+                    MOCK_CONST_METHOD1 (GetConfig, SConf * (Display *));
+                    MOCK_CONST_METHOD1 (GetScreenSizes, Sizes (SCPtr const &));
+                    MOCK_CONST_METHOD3 (ChangeSizeIndex, void (Display *,
+                                                               SCPtr const &,
+                                                               unsigned int));
             };
         }
     }

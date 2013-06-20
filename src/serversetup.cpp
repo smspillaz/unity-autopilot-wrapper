@@ -37,7 +37,6 @@ void uaw::CustomizeServer (xt::XServer     &server,
             break;
         case uaw::ServerType::Xephyr:
             server.SetServerPath (uaw::locateBinary ("UnityXephyrWrapper"));
-            server.SetOption ("-screen", "1024x768");
             break;
         default:
             break;

@@ -11,6 +11,15 @@
 
 namespace uaw = unity::autopilot_wrapper;
 
+uaw::XRRScreenConfigDeleter::~XRRScreenConfigDeleter ()
+{
+}
+
+void
+uaw::XRRScreenConfigDeleter::operator() (XRRScreenConfiguration *) const
+{
+}
+
 uaw::X11Connection::X11Connection ()
 {
 }

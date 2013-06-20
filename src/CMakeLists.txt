@@ -11,6 +11,8 @@ include_directories (${UAW_EXTERNAL_INCLUDE_DIRS}
 # as the lines need to go over 100 chars
 
 set (UAW_LIBRARY_SRCS
+     ${CMAKE_CURRENT_SOURCE_DIR}/concrete_x11_connection.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/concrete_x11_connection.h
      ${CMAKE_CURRENT_SOURCE_DIR}/displaydiscovery.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/displaydiscovery.h
      ${CMAKE_CURRENT_SOURCE_DIR}/fdbackup.cpp
@@ -34,6 +36,8 @@ set (UAW_LIBRARY_SRCS
      ${CMAKE_CURRENT_SOURCE_DIR}/readfd.h
      ${CMAKE_CURRENT_SOURCE_DIR}/redirectedfd.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/redirectedfd.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resizescreen.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resizescreen.h
      ${CMAKE_CURRENT_SOURCE_DIR}/x11_connection.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/x11_connection.h)
 
